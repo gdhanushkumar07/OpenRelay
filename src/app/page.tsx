@@ -134,10 +134,7 @@ export default function Home() {
           
           <div className="text-sm text-charcoal/70 font-medium leading-relaxed space-y-2">
             <p className="font-bold text-charcoal">
-              VendorFlow enables AI agents from different organizations to securely communicate, share context, route work, and resolve business workflows without manual coordination.
-            </p>
-            <p className="text-xs text-charcoal/60 font-semibold leading-relaxed">
-              Powered by AgentMesh and Aicoo.
+              VendorFlow is a B2B operations coordination platform. While AgentMesh powers the underlying coordination engine, Aicoo enables secure communication, routing, and permissioned context sharing between AI agents belonging to different organizations.
             </p>
           </div>
 
@@ -146,7 +143,7 @@ export default function Home() {
               href="/network"
               className="flex items-center justify-center gap-2 px-6 py-3.5 bg-charcoal hover:bg-charcoal/90 text-cream rounded-xl font-syne font-bold uppercase text-xs transition-all shadow-md group border border-charcoal"
             >
-              <span>Deploy VendorFlow Node</span>
+              <span>Launch Live Demo</span>
               <ArrowRight className="w-4 h-4 text-yellow transition-transform group-hover:translate-x-1" />
             </Link>
             <a
@@ -202,7 +199,7 @@ export default function Home() {
               href="/network"
               className="flex items-center justify-center gap-2 px-8 py-4 bg-yellow hover:bg-yellow-dark text-charcoal rounded-xl font-syne font-bold uppercase text-xs transition-all shadow-md border border-yellow-dark"
             >
-              <span>Launch VendorFlow Node</span>
+              <span>Launch Live Demo</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <Link

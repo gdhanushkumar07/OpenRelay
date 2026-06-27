@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { aicoo } from "../lib/aicoo";
+import { aicooService } from "../services/aicoo";
 import { ClipboardList, ShieldAlert, Sparkles, CheckCircle2, ListTodo, Layers, ArrowUpRight } from "lucide-react";
 
 interface Briefing {
@@ -34,11 +34,35 @@ export default function BriefingPanel() {
       try {
         setLoading(true);
         const [briefRes, matrixRes] = await Promise.all([
-          aicoo.generateBriefing(),
-          aicoo.getMatrix({})
+          aicooService.generateBriefing(),
+          aicooService.getMatrix({})
         ]);
-        setBriefing(briefRes);
-        setMatrix(matrixRes);
+        
+        // Robust runtime validation of API responses
+        const safeBriefing: Briefing = {
+          summary: briefRes && typeof briefRes.summary === "string" ? briefRes.summary : "No briefing details available.",
+          actionItems: briefRes && Array.isArray(briefRes.actionItems) ? briefRes.actionItems : [],
+          riskScore: briefRes && typeof briefRes.riskScore === "string" ? briefRes.riskScore : "Low"
+        };
+
+        const ensureArray = (arr: any): MatrixItem[] => {
+          if (!Array.isArray(arr)) return [];
+          return arr.map((item: any, idx: number) => ({
+            id: item && typeof item.id === "string" ? item.id : `fallback_${idx}`,
+            title: item && typeof item.title === "string" ? item.title : String(item),
+            desc: item && typeof item.desc === "string" ? item.desc : "No description provided"
+          }));
+        };
+
+        const safeMatrix: Matrix = {
+          q1: ensureArray(matrixRes?.q1),
+          q2: ensureArray(matrixRes?.q2),
+          q3: ensureArray(matrixRes?.q3),
+          q4: ensureArray(matrixRes?.q4)
+        };
+
+        setBriefing(safeBriefing);
+        setMatrix(safeMatrix);
       } catch (err) {
         console.error("Error fetching briefing info:", err);
       } finally {

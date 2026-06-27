@@ -1,8 +1,7 @@
-// src/components/HeartbeatDash.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { aicoo } from "../lib/aicoo";
+import { aicooService } from "../services/aicoo";
 import { Activity, ShieldCheck, Mail, ChevronDown, ChevronRight, Clock, RefreshCw, Zap } from "lucide-react";
 
 interface HeartbeatAction {
@@ -30,15 +29,20 @@ export default function HeartbeatDash() {
   async function fetchHistory() {
     try {
       setLoading(true);
-      const res = await aicoo.getHeartbeatRuns();
-      // Supplement mock runs with scans details
-      const detailedRuns = res.map((r: any, idx: number) => ({
-        ...r,
+      const res = await aicooService.getHeartbeatRuns();
+      const runsArray = Array.isArray(res) ? res : [];
+      
+      const detailedRuns = runsArray.map((r: any, idx: number) => ({
+        id: r && typeof r.id === "string" ? r.id : `run_${idx}`,
+        timestamp: r && typeof r.timestamp === "string" ? r.timestamp : new Date().toISOString(),
+        atRisk: r && typeof r.atRisk === "number" ? r.atRisk : 0,
+        actions: r && typeof r.actions === "number" ? r.actions : 0,
+        timeSaved: r && typeof r.timeSaved === "number" ? r.timeSaved : 0,
         customersScanned: 150 - idx * 10,
         actionsCreated: [
           { customer: "Carrier Express", reason: "Surcharge rate discrepancy", draft: "Subject: Transit Billing Discrepancy Correction" },
           { customer: "Sileon Logistics", reason: "Shared link inactive", draft: "Subject: Request to Re-verify Shared Workspace" }
-        ].slice(0, r.actions)
+        ].slice(0, r && typeof r.actions === "number" ? r.actions : 0)
       }));
       setRuns(detailedRuns);
     } catch (err) {
@@ -55,16 +59,17 @@ export default function HeartbeatDash() {
   const handleManualSweep = async () => {
     try {
       setSweeping(true);
-      const result = await aicoo.runHeartbeat();
+      const result = await aicooService.runHeartbeat();
       
+      const actionsCount = result && Array.isArray(result.actionsCreated) ? result.actionsCreated.length : 0;
       const newRun: HeartbeatRun = {
         id: `run_${Date.now()}`,
         timestamp: new Date().toISOString(),
-        atRisk: result.atRiskCustomers,
-        actions: result.actionsCreated.length,
-        timeSaved: result.timeSavedHours,
-        customersScanned: result.customersScanned,
-        actionsCreated: result.actionsCreated
+        atRisk: result && typeof result.atRiskCustomers === "number" ? result.atRiskCustomers : 0,
+        actions: actionsCount,
+        timeSaved: result && typeof result.timeSavedHours === "number" ? result.timeSavedHours : 0.0,
+        customersScanned: result && typeof result.customersScanned === "number" ? result.customersScanned : 15,
+        actionsCreated: result && Array.isArray(result.actionsCreated) ? result.actionsCreated : []
       };
       
       setRuns(prev => [newRun, ...prev]);
@@ -184,7 +189,7 @@ export default function HeartbeatDash() {
                       <p className="text-xs text-charcoal/50 italic">No anomalies found. Operations secure.</p>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {run.actionsCreated?.map((action, idx) => (
+                        {Array.isArray(run.actionsCreated) && run.actionsCreated.map((action, idx) => (
                           <div key={idx} className="bg-white border border-charcoal/10 p-4 rounded-xl space-y-3 shadow-sm">
                             <div className="flex justify-between items-start">
                               <div>

@@ -86,7 +86,7 @@ export default function WhyAgentMesh() {
             Meet VendorFlow
           </h2>
           <p className="text-xs text-charcoal/60 leading-relaxed font-semibold">
-            VendorFlow is a business workflow coordination platform built on AgentMesh. AgentMesh is the coordination engine; Aicoo is the communication infrastructure.
+            Today's companies already use AI. Tomorrow's companies will coordinate AI COOs across organizations. VendorFlow demonstrates how independent companies securely communicate using Aicoo. The dashboard exists to visualize that invisible coordination.
           </p>
         </div>
 

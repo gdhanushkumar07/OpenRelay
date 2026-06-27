@@ -2,7 +2,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { subscribeToShareLinks, aicoo, clearMockShares } from "../lib/aicoo";
+import { subscribeToShareLinks, clearMockShares } from "../lib/aicoo";
+import { aicooService } from "../services/aicoo";
 import { Share2, Trash2, Shield, Calendar, Copy, Check, Eye } from "lucide-react";
 
 interface ShareLink {
@@ -26,7 +27,7 @@ export default function ShareManager() {
   }, []);
 
   const handleRevoke = async (id: string) => {
-    await aicoo.revokeShareLink(id);
+    await aicooService.revokeShareLink(id);
   };
 
   const handleCopy = (id: string, url: string) => {
@@ -76,13 +77,17 @@ export default function ShareManager() {
                 <div className="flex items-center gap-2 flex-wrap">
                   <span className="text-xs font-bold text-charcoal truncate">{share.label}</span>
                   <span className="text-[9px] font-syne font-bold uppercase bg-charcoal text-cream px-1.5 py-0.5 rounded tracking-wide">
-                    {share.scope === 'folders' ? `/Folder (${share.folderIds[0] === 2 ? 'Billing' : 'Scoped'})` : 'Full Workspace'}
+                    {share.scope === 'folders' && Array.isArray(share.folderIds) && share.folderIds.length > 0
+                      ? `/Folder (${share.folderIds[0] === 2 ? 'Billing' : 'Scoped'})`
+                      : share.scope === 'folders'
+                        ? 'Scoped Folder'
+                        : 'Full Workspace'}
                   </span>
                 </div>
                 <div className="flex items-center gap-3 text-[10px] text-charcoal/50">
                   <div className="flex items-center gap-1">
                     <Calendar className="w-3 h-3" />
-                    <span>Expires: {new Date(share.expiresAt).toLocaleDateString()}</span>
+                    <span>Expires: {share.expiresAt ? new Date(share.expiresAt).toLocaleDateString() : '1 Hour'}</span>
                   </div>
                   <div className="flex items-center gap-1 font-mono text-[9px] bg-charcoal/5 px-1 rounded truncate max-w-[120px]">
                     ID: {share.id}

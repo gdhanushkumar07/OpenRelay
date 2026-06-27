@@ -39,12 +39,6 @@ export default function Navbar() {
     setShowKeyModal(false);
   };
 
-  const navItems = [
-    { href: "/network", label: "Network OS", icon: Network },
-    { href: "/escalation", label: "Human Portal", icon: UserCheck },
-    { href: "/heartbeat", label: "Heartbeat", icon: Activity },
-  ];
-
   return (
     <>
       <header className="sticky top-0 z-40 w-full bg-cream border-b border-charcoal/10 px-6 py-4 flex items-center justify-between">
@@ -59,29 +53,7 @@ export default function Navbar() {
           </div>
         </Link>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center gap-1.5">
-          {navItems.map((item) => {
-            const isActive = pathname === item.href;
-            const Icon = item.icon;
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-syne font-bold uppercase transition-all border ${
-                  isActive
-                    ? "bg-charcoal text-cream border-charcoal"
-                    : "bg-transparent text-charcoal/60 border-transparent hover:border-charcoal/15 hover:text-charcoal"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Status & Key toggle */}
+        {/* Action CTA & Status */}
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowKeyModal(true)}

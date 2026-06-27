@@ -27,7 +27,7 @@ export function clearApiLogs() {
   logListeners.forEach(listener => listener([]));
 }
 
-function addLog(method: 'GET' | 'POST' | 'DELETE', endpoint: string, payload: any, response: any, status = 200) {
+export function addLog(method: 'GET' | 'POST' | 'DELETE', endpoint: string, payload: any, response: any, status = 200) {
   const newLog: ApiLog = {
     id: Math.random().toString(36).substring(2, 9),
     timestamp: new Date().toLocaleTimeString(),
@@ -143,7 +143,7 @@ async function request(method: 'GET' | 'POST' | 'DELETE', path: string, body?: a
         ],
         timeSavedHours: 6.0
       };
-    } else if (path === '/heartbeat/runs') {
+    } else if (path.startsWith('/heartbeat/runs')) {
       mockResponse = [
         { id: "run_1", timestamp: new Date(Date.now() - 4 * 3600000).toISOString(), atRisk: 1, actions: 1, timeSaved: 1.5 },
         { id: "run_2", timestamp: new Date(Date.now() - 8 * 3600000).toISOString(), atRisk: 2, actions: 2, timeSaved: 3.0 },
