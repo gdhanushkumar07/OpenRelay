@@ -4,7 +4,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { 
   Building2, ShoppingCart, ShieldCheck, Truck, Warehouse, 
-  CreditCard, Shield, RefreshCw, CheckCircle2, Zap, Lock
+  CreditCard, Shield, RefreshCw, Lock
 } from "lucide-react";
 
 interface Node {
@@ -36,14 +36,25 @@ interface CoordinationStep {
 }
 
 const COORDINATION_FLOW: CoordinationStep[] = [
-  { from: "buyer", to: "marketplace", label: "01 / Requisition Submitted", status: "Buyer Procurement Agent requests 2x Headphones" },
-  { from: "marketplace", to: "alpha", label: "02 / Primary Stock Audit", status: "Checking inventory at Supplier Alpha (1 unit found, 1 deficit)" },
-  { from: "marketplace", to: "beta", label: "03 / Stock Failover Routing", status: "Aicoo securely borrows backup stock from Supplier Beta" },
-  { from: "marketplace", to: "warehouse", label: "04 / Warehouse Allocation", status: "Vision Warehouse assigns storage aisle A-12 for packaging" },
-  { from: "warehouse", to: "courier", label: "05 / Transit Route Dispatch", status: "Prime Logistics schedules express freight delivery" },
-  { from: "courier", to: "finance", label: "06 / Smart Escrow Settlement", status: "Clearing payment verification via cryptographic proof" },
-  { from: "finance", to: "insurance", label: "07 / Transit Risk Underwrite", status: "Sky Insurance applies SLA cargo transit policy coverage" },
-  { from: "insurance", to: "buyer", label: "08 / Handshake Finalized", status: "End-to-End workflow completed securely under Aicoo" }
+  { from: "buyer", to: "marketplace", label: "01 / Requisition", status: "Buyer submits order requisition context" },
+  { from: "marketplace", to: "alpha", label: "02 / Stock Audit", status: "Auditing inventory at Supplier Alpha" },
+  { from: "alpha", to: "warehouse", label: "03 / Allocation", status: "Allocating warehouse packing items" },
+  { from: "warehouse", to: "finance", label: "04 / Settlement", status: "Finance Agent verifying escrow deposit" },
+  { from: "finance", to: "insurance", label: "05 / Underwriting", status: "Generating cargo transit policy coverage" },
+  { from: "insurance", to: "courier", label: "06 / Scheduling", status: "Courier scheduling express delivery route" },
+  { from: "courier", to: "marketplace", label: "07 / Transit Active", status: "Updating Marketplace routing status log" },
+  { from: "marketplace", to: "buyer", label: "08 / Handshake Complete", status: "Order verified and handshaked securely" }
+];
+
+const PIPELINE_STEPS = [
+  "Identity Verified",
+  "Policy Validated",
+  "Session Created",
+  "Inventory Reserved",
+  "Payment Approved",
+  "Insurance Generated",
+  "Courier Assigned",
+  "Handshake Completed"
 ];
 
 interface Packet {
@@ -59,6 +70,13 @@ export default function HeroNetworkVisualization() {
   const [parallax, setParallax] = useState({ x: 0, y: 0 });
   const [flowIndex, setFlowIndex] = useState(0);
   const [packet, setPacket] = useState<Packet | null>(null);
+  
+  // Hover and Telemetry states
+  const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
+  const [latency, setLatency] = useState(8);
+  const [reqsPerSec, setReqsPerSec] = useState(13.5);
+  const [messagesRouted, setMessagesRouted] = useState(482);
+  const [secureSessions, setSecureSessions] = useState(128);
 
   // Mouse Parallax effect
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -74,6 +92,17 @@ export default function HeroNetworkVisualization() {
   const handleMouseLeave = () => {
     setParallax({ x: 0, y: 0 });
   };
+
+  // Telemetry fluctuation effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLatency(Math.floor(Math.random() * 6) + 6);
+      setReqsPerSec(12.4 + Math.random() * 2.1);
+      setMessagesRouted(prev => prev + Math.floor(Math.random() * 2) + 1);
+      setSecureSessions(prev => prev + (Math.random() > 0.85 ? 1 : 0));
+    }, 1800);
+    return () => clearInterval(timer);
+  }, []);
 
   // Structured coordination flow sequence loop
   useEffect(() => {
@@ -135,6 +164,33 @@ export default function HeroNetworkVisualization() {
 
   const activeStep = COORDINATION_FLOW[flowIndex];
 
+  const getNodeState = (nodeId: string) => {
+    if (activeStep.from === nodeId) return "Responding";
+    if (activeStep.to === nodeId) return "Processing";
+    
+    const fromIdx = COORDINATION_FLOW.findIndex(s => s.from === nodeId);
+    if (fromIdx !== -1 && fromIdx < flowIndex) return "Completed";
+    
+    return "Idle";
+  };
+
+  const getActiveOperation = (nodeId: string) => {
+    const state = getNodeState(nodeId);
+    if (state === "Processing" || state === "Responding") {
+      switch (nodeId) {
+        case "buyer": return "Creating Purchase Intent";
+        case "marketplace": return "Routing Secure Session";
+        case "alpha": return "Checking Inventory";
+        case "warehouse": return "Allocating Stock";
+        case "finance": return "Verifying Payment";
+        case "insurance": return "Generating Coverage";
+        case "courier": return "Scheduling Delivery";
+        default: return "Standby";
+      }
+    }
+    return state === "Completed" ? "Context Shared" : "Standby";
+  };
+
   return (
     <div
       ref={containerRef}
@@ -145,18 +201,19 @@ export default function HeroNetworkVisualization() {
       {/* CSS stylesheet inline injection */}
       <style>{`
         @keyframes node-breathe {
-          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(242, 201, 76, 0.1)); }
-          50% { transform: scale(1.03); filter: drop-shadow(0 0 15px rgba(242, 201, 76, 0.35)); }
+          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 5px rgba(242, 201, 76, 0.08)); }
+          50% { transform: scale(1.02); filter: drop-shadow(0 0 12px rgba(242, 201, 76, 0.3)); }
         }
-        @keyframes pulse-active-connection {
-          0%, 100% { stroke-opacity: 0.2; }
-          50% { stroke-opacity: 0.8; stroke: #f2c94c; }
+        @keyframes active-dash {
+          to {
+            stroke-dashoffset: -20;
+          }
         }
         .animate-node-pulse {
           animation: node-breathe 4s ease-in-out infinite;
         }
-        .animate-active-path {
-          animation: pulse-active-connection 2s ease-in-out infinite;
+        .animated-mesh-path {
+          animation: active-dash 1.2s linear infinite;
         }
         .grid-mesh-glow {
           background-size: 20px 20px;
@@ -181,14 +238,16 @@ export default function HeroNetworkVisualization() {
               openrelay.network/coordination-stream
             </span>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold text-yellow uppercase">
-              <Zap className="w-3 h-3 text-yellow animate-pulse shrink-0" />
-              <span>Aicoo Mesh Live</span>
-            </div>
-            <div className="text-[10px] font-mono text-white/35 hidden md:inline">
-              RTT: 8ms
-            </div>
+          
+          <div className="flex items-center gap-2.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/25 text-[10px] font-bold text-emerald-400">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping shrink-0" />
+            <span>LIVE</span>
+            <span className="text-white/20">|</span>
+            <span className="text-white/70 font-semibold">AICOO Protocol Active</span>
+            <span className="text-white/20">|</span>
+            <span className="text-yellow font-extrabold uppercase">Encrypted</span>
+            <span className="text-white/20">|</span>
+            <span className="text-white/50 font-mono">RTT: {latency}ms</span>
           </div>
         </div>
 
@@ -199,25 +258,70 @@ export default function HeroNetworkVisualization() {
           <div className="absolute top-1/4 left-1/4 w-80 h-80 bg-yellow/5 rounded-full blur-3xl pointer-events-none" />
           <div className="absolute bottom-1/4 right-1/4 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Active Flow Status Overlay Box */}
-          <div className="absolute top-4 left-4 z-20 px-3.5 py-2.5 bg-charcoal/90 border border-yellow/20 backdrop-blur-md rounded-xl shadow-lg text-[10px] font-semibold text-white max-w-[270px] animate-in fade-in duration-300">
-            <div className="flex items-center gap-1.5 text-[8px] font-mono text-yellow font-extrabold uppercase tracking-widest">
+          {/* Live Protocol Pipeline Checklist */}
+          <div className="absolute top-4 left-4 z-20 p-4 bg-charcoal/90 border border-white/10 backdrop-blur-md rounded-2xl shadow-xl text-[10px] space-y-2.5 min-w-[155px]">
+            <div className="flex items-center gap-1.5 text-[8px] font-mono text-yellow font-extrabold uppercase tracking-widest border-b border-white/5 pb-2">
               <span className="w-1.5 h-1.5 rounded-full bg-yellow animate-ping shrink-0" />
-              <span>Aicoo Pipeline Status</span>
+              <span>Aicoo Pipeline</span>
             </div>
-            <p className="mt-1 font-bold text-white uppercase text-[9px] tracking-wide leading-tight">
-              {activeStep.label}
-            </p>
-            <p className="text-[9px] text-white/60 font-semibold leading-normal mt-1">
-              {activeStep.status}
-            </p>
+            <div className="space-y-1.5">
+              {PIPELINE_STEPS.map((stepName, idx) => {
+                const isActive = flowIndex === idx;
+                const isCompleted = flowIndex > idx;
+                return (
+                  <div key={idx} className={`flex items-center gap-2 transition-all duration-300 ${
+                    isActive ? "text-yellow font-extrabold scale-[1.02]" : isCompleted ? "text-emerald-400" : "text-white/30"
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+                      isActive ? "bg-yellow animate-pulse" : isCompleted ? "bg-emerald-400" : "bg-white/10"
+                    }`} />
+                    <span className="truncate text-[9.5px]">{stepName}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Live Enterprise Metrics Telemetry */}
+          <div className="absolute bottom-4 right-4 z-20 p-4 bg-charcoal/90 border border-white/10 backdrop-blur-md rounded-2xl shadow-xl text-[10px] space-y-3 min-w-[190px]">
+            <div className="flex items-center justify-between text-[8px] font-mono text-blue-400 font-extrabold uppercase tracking-widest border-b border-white/5 pb-2">
+              <span>Telemetry Monitor</span>
+              <span className="flex h-2 w-2 relative">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+              </span>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-3 font-semibold text-white/70">
+              <div>
+                <div className="text-[7.5px] text-white/35 uppercase">Latency</div>
+                <div className="text-white font-mono text-[11px] mt-0.5">{latency}ms</div>
+              </div>
+              <div>
+                <div className="text-[7.5px] text-white/35 uppercase">Req / Sec</div>
+                <div className="text-white font-mono text-[11px] mt-0.5">{reqsPerSec.toFixed(1)}</div>
+              </div>
+              <div>
+                <div className="text-[7.5px] text-white/35 uppercase">Routed Msg</div>
+                <div className="text-white font-mono text-[11px] mt-0.5">{messagesRouted}</div>
+              </div>
+              <div>
+                <div className="text-[7.5px] text-white/35 uppercase">Sessions</div>
+                <div className="text-white font-mono text-[11px] mt-0.5">{secureSessions}</div>
+              </div>
+            </div>
+
+            <div className="border-t border-white/5 pt-2 flex items-center justify-between text-[8.5px] text-white/40">
+              <span>Security: <span className="text-emerald-400 font-mono">99.8%</span></span>
+              <span>v1.2.4-active</span>
+            </div>
           </div>
 
           {/* SVG Pipelines & Packets */}
           <svg className="absolute inset-0 w-full h-full pointer-events-none z-0">
             {/* Draw pipeline connections */}
             {NODES.map((node, i) =>
-              NODES.slice(i + 1).map((target, j) => {
+              NODES.slice(i + 1).map((target) => {
                 const isConnected = checkConnection(node.id, target.id);
                 if (!isConnected) return null;
 
@@ -228,18 +332,18 @@ export default function HeroNetworkVisualization() {
 
                 return (
                   <g key={`${node.id}-${target.id}`}>
-                    {/* Base grey line */}
+                    {/* Base connection line */}
                     <line
                       x1={`${node.x}%`}
                       y1={`${node.y}%`}
                       x2={`${target.x}%`}
                       y2={`${target.y}%`}
-                      stroke={isActivePath ? "rgba(242, 201, 76, 0.3)" : "rgba(255, 255, 255, 0.08)"}
-                      strokeWidth={isActivePath ? "2.5" : "1.5"}
+                      stroke={isActivePath ? "rgba(242, 201, 76, 0.4)" : "rgba(255, 255, 255, 0.08)"}
+                      strokeWidth={isActivePath ? "2" : "1.5"}
                       strokeDasharray={isActivePath ? "none" : "4 4"}
-                      className={isActivePath ? "animate-active-path" : ""}
+                      className={isActivePath ? "animated-mesh-path" : ""}
                     />
-                    {/* Secondary thick glow trace */}
+                    {/* Secondary glow trace */}
                     {isActivePath && (
                       <line
                         x1={`${node.x}%`}
@@ -278,31 +382,54 @@ export default function HeroNetworkVisualization() {
           {/* Floating Nodes */}
           {NODES.map((node) => {
             const Icon = node.icon;
-            const isActive = activeStep.from === node.id || activeStep.to === node.id;
-            const isSender = activeStep.from === node.id;
-            const isReceiver = activeStep.to === node.id;
+            const state = getNodeState(node.id);
+            const isActive = state === "Processing" || state === "Responding";
+            const isCompleted = state === "Completed";
+
+            let borderClass = "border-white/10";
+            let glowShadow = "";
+            let dotColor = "bg-white/10";
+            let nodeOpacity = "opacity-40 scale-95";
+            
+            if (state === "Processing") {
+              borderClass = "border-blue-400";
+              glowShadow = "shadow-lg shadow-blue-500/10";
+              dotColor = "bg-blue-400";
+              nodeOpacity = "opacity-100 scale-105 animate-node-pulse";
+            } else if (state === "Responding") {
+              borderClass = "border-yellow";
+              glowShadow = "shadow-lg shadow-yellow/10";
+              dotColor = "bg-yellow";
+              nodeOpacity = "opacity-100 scale-105 animate-node-pulse";
+            } else if (isCompleted) {
+              borderClass = "border-emerald-500/30";
+              glowShadow = "";
+              dotColor = "bg-emerald-400";
+              nodeOpacity = "opacity-85 scale-100";
+            }
 
             return (
               <div
                 key={node.id}
                 style={{ left: `${node.x}%`, top: `${node.y}%` }}
-                className={`absolute -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-500 ${
-                  isActive ? "scale-105 opacity-100 animate-node-pulse" : "scale-95 opacity-65"
-                }`}
+                className={`absolute -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-500 ${nodeOpacity}`}
+                onMouseEnter={() => setHoveredNode(node)}
+                onMouseLeave={() => setHoveredNode(null)}
               >
                 <div
-                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl bg-charcoal/95 border ${
-                    isSender ? "border-yellow shadow-lg shadow-yellow/10" :
-                    isReceiver ? "border-blue-400 shadow-lg shadow-blue-500/10" :
-                    "border-white/10"
-                  } backdrop-blur-md transition-all relative`}
+                  className={`flex items-center gap-2 px-3 py-2.5 rounded-xl bg-charcoal/95 border ${borderClass} ${glowShadow} backdrop-blur-md transition-all relative cursor-pointer`}
                 >
                   {/* Status Indicator Dot */}
                   {isActive && (
-                    <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 ${isSender ? "bg-yellow" : "bg-blue-400"} border border-charcoal rounded-full animate-ping z-30`} />
+                    <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 ${dotColor} border border-charcoal rounded-full animate-ping z-30`} />
                   )}
-                  {isActive && (
-                    <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 ${isSender ? "bg-yellow" : "bg-blue-400"} border border-charcoal rounded-full z-30`} />
+                  {(isActive || isCompleted) && (
+                    <span className={`absolute -top-1 -right-1 w-2.5 h-2.5 ${dotColor} border border-charcoal rounded-full z-30`} />
+                  )}
+
+                  {/* Marketplace live activity ring */}
+                  {node.id === "marketplace" && (
+                    <span className="absolute inset-0 rounded-xl border border-yellow/30 animate-ping opacity-25" style={{ animationDuration: '3s' }} />
                   )}
 
                   <div className={`p-1.5 rounded-lg bg-gradient-to-br ${node.color} text-white shrink-0 shadow-sm`}>
@@ -313,7 +440,7 @@ export default function HeroNetworkVisualization() {
                       {node.name}
                     </div>
                     <div className="text-[8.5px] font-medium text-white/50 leading-none mt-1 truncate">
-                      {node.role}
+                      {isActive ? getActiveOperation(node.id) : node.role}
                     </div>
                   </div>
                 </div>
@@ -337,19 +464,62 @@ export default function HeroNetworkVisualization() {
             </div>
           )}
 
+          {/* Lightweight Floating Tooltip */}
+          {hoveredNode && (
+            <div 
+              className="absolute z-30 p-3 bg-charcoal/95 border border-white/10 backdrop-blur-md rounded-xl shadow-2xl text-[9.5px] space-y-1.5 text-white/80 pointer-events-none transition-all duration-200 w-48 font-semibold"
+              style={{
+                left: `${hoveredNode.x > 50 ? hoveredNode.x - 22 : hoveredNode.x + 2}%`,
+                top: `${hoveredNode.y > 50 ? hoveredNode.y - 12 : hoveredNode.y + 2}%`,
+              }}
+            >
+              <div className="font-extrabold text-white border-b border-white/5 pb-1">
+                {hoveredNode.name}
+              </div>
+              <div><span className="text-white/40">Role:</span> {hoveredNode.role}</div>
+              <div><span className="text-white/40">Current Op:</span> {getActiveOperation(hoveredNode.id)}</div>
+              <div><span className="text-white/40">Status:</span> {getNodeState(hoveredNode.id)}</div>
+              <div>
+                <span className="text-white/40">Scope:</span>{" "}
+                <span className="text-yellow font-mono text-[9px]">
+                  {hoveredNode.id === "buyer" ? "Read/Write" : "Read-Scoped"}
+                </span>
+              </div>
+              <div className="flex justify-between border-t border-white/5 pt-1 text-[8.5px] text-white/40">
+                <span>RTT: {latency + (hoveredNode.id === "buyer" ? 0 : 2)}ms</span>
+                <span>STATUS 200 OK</span>
+              </div>
+            </div>
+          )}
+
         </div>
 
-        {/* Browser Footer Activity Status Bar */}
-        <div className="bg-charcoal-light px-4 py-3 border-t border-white/10 flex items-center justify-between text-[11px] z-20">
-          <div className="flex items-center gap-2 text-white/60">
-            <Lock className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-            <span className="font-semibold text-white/80">Context Isolation Protected</span>
-            <span className="text-white/30">•</span>
-            <span className="text-white/50 hidden sm:inline">Permissioned Cryptographic Relays</span>
+        {/* Browser Footer Status Bar */}
+        <div className="bg-charcoal-light px-4 py-3 border-t border-white/10 flex items-center justify-between text-[11px] z-20 flex-wrap gap-2">
+          <div className="flex items-center gap-3 text-white/50 flex-wrap">
+            <span className="flex items-center gap-1 text-emerald-400 font-semibold">
+              <Lock className="w-3.5 h-3.5 shrink-0" />
+              <span>Context Isolated</span>
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1">
+              <span>✓ Identity Verified</span>
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1">
+              <span>✓ Policy Verified</span>
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="flex items-center gap-1 text-yellow">
+              <span>⚡ Secure Relay Active</span>
+            </span>
+            <span className="text-white/20">•</span>
+            <span className="font-mono text-white/40">256-bit AES</span>
+            <span className="text-white/20">•</span>
+            <span className="text-white/40">8 Nodes Mesh Connected</span>
           </div>
-          <div className="flex items-center gap-1 text-yellow font-bold text-[10px] tracking-wide">
-            <span>AICOO PROTOCOL</span>
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 ml-1 shrink-0" />
+          <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
+            Protocol v1.2
           </div>
         </div>
       </div>
