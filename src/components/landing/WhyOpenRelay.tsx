@@ -1,10 +1,10 @@
-// src/components/landing/WhyAgentMesh.tsx
+// src/components/landing/WhyOpenRelay.tsx
 "use client";
 
 import React from "react";
 import { ShoppingCart, Database, Key, CheckCircle } from "lucide-react";
 
-export default function WhyAgentMesh() {
+export default function WhyOpenRelay() {
   const steps = [
     {
       id: "01",

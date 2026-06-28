@@ -8,7 +8,7 @@ import HeroNetworkVisualization from "../components/landing/HeroNetworkVisualiza
 import FutureOfWork from "../components/landing/FutureOfWork";
 import RealProblem from "../components/landing/RealProblem";
 import WhyAicooExists from "../components/landing/WhyAicooExists";
-import WhyAgentMesh from "../components/landing/WhyAgentMesh";
+import WhyOpenRelay from "../components/landing/WhyOpenRelay";
 import DashboardPreview from "../components/landing/DashboardPreview";
 import AicooPowersEverything from "../components/landing/AicooPowersEverything";
 import ArchitectureSection from "../components/landing/ArchitectureSection";
@@ -291,7 +291,7 @@ export default function Home() {
       <FutureOfWork />
 
       {/* 3. HOW IT WORKS */}
-      <WhyAgentMesh />
+      <WhyOpenRelay />
       <AicooPowersEverything />
       <DashboardPreview />
 
@@ -312,7 +312,7 @@ export default function Home() {
             <span className="font-serif italic font-normal text-yellow lowercase capitalize">With Aicoo, companies have coordinated organizations.</span>
           </h2>
           <p className="text-sm sm:text-base text-white/70 font-normal leading-relaxed max-w-2xl mx-auto">
-            OpenRelay demonstrates one real-world application of that future. AgentMesh is the coordination engine, and Aicoo is the communication infrastructure.
+            OpenRelay demonstrates one real-world application of that future. OpenRelay is the coordination engine, and Aicoo is the communication infrastructure.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">

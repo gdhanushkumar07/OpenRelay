@@ -375,6 +375,7 @@ export default function Marketplace({ onBuyProduct, onBack, customerDetails }: M
                         <img 
                           src={prod.imageUrl} 
                           alt={prod.name}
+                          loading="lazy"
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                         />
                       </div>
@@ -435,6 +436,7 @@ export default function Marketplace({ onBuyProduct, onBack, customerDetails }: M
                 <img 
                   src={selectedProduct.imageUrl} 
                   alt={selectedProduct.name}
+                  loading="lazy"
                   className="w-full h-full object-cover"
                 />
               </div>

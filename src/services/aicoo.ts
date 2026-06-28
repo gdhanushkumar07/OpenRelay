@@ -94,9 +94,6 @@ async function apiRequest(method: 'GET' | 'POST' | 'DELETE', path: string, body?
     addLog(method, path, body, data, res.status);
     return data;
   } catch (error: any) {
-    // Log the warning and fallback
-    console.warn(`Aicoo live API failed for ${path}:`, error.message);
-    
     // Fallback adapter triggers for robust demo experience
     const fallbackResponse = getFallbackResponse(path, body);
     addLog(method, path, body, {

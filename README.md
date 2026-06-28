@@ -2,7 +2,11 @@
 
 > **The Secure Coordination Protocol for Cross-Organization AI Agents**
 
-🚀 Built for the **Aicoo Hackathon**
+🚀 Built for the **Aicoo Protocol Hackathon**
+
+🌐 **Live Demo:** _Coming Soon_
+🎥 **Demo Video:** _Coming Soon_
+📄 **Architecture:** _Coming Soon_
 
 ---
 
@@ -243,7 +247,7 @@ npm start
 
 **Team Lakshya**
 
-Built for the **Aicoo Hackathon**.
+Built for the **Aicoo Protocol Hackathon**.
 
 ---
 

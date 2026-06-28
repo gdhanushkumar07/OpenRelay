@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "OpenRelay",
-  description: "OpenRelay enables AI agents from different organizations to securely communicate, share context, route work, and resolve business workflows without manual coordination. Powered by AgentMesh and Aicoo.",
+  description: "OpenRelay enables AI agents from different organizations to securely communicate, share context, route work, and resolve business workflows without manual coordination. Powered by OpenRelay and Aicoo.",
   icons: {
     icon: "/favicon.svg",
   },
